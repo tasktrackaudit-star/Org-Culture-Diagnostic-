@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Culture Diagnostic — Organizational Audit</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #F5F1EB;
+  --surface:  #FDFCF9;
+  --card:     #FFFFFF;
+  --border:   #E2DAD0;
+  --border-lt:#EDE8E0;
+
+  --ink:      #2A2420;
+  --ink-2:    #4A443E;
+  --muted:    #8C837A;
+  --faint:    #C9C2B8;
+
+  --bronze:    #8A6A38;
+  --bronze-lt: #B08C50;
+  --bronze-dim:rgba(138,106,56,0.10);
+
+  --P:   #8A6A38;
+  --R:   #2E7B94;
+  --I:   #3D8B60;
+  --C:   #A04530;
+  --H:   #6B50A2;
+
+  --P-dim: rgba(138,106,56,0.10);
+  --R-dim: rgba(46,123,148,0.10);
+  --I-dim: rgba(61,139,96,0.10);
+  --C-dim: rgba(160,69,48,0.10);
+  --H-dim: rgba(107,80,162,0.10);
+
+  --shadow-sm:  0 1px 4px rgba(42,36,32,0.06), 0 0 0 1px rgba(42,36,32,0.04);
+  --shadow-md:  0 4px 20px rgba(42,36,32,0.08), 0 0 0 1px rgba(42,36,32,0.04);
+  --shadow-lg:  0 12px 40px rgba(42,36,32,0.10), 0 0 0 1px rgba(42,36,32,0.04);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Jost', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── Texture overlay ─── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  opacity: 0.6;
+}
+
+/* ─── Screens ─── */
+.screen { display: none; opacity: 0; position: relative; z-index: 1; }
+.screen.active {
+  display: flex;
+  flex-direction: column;
+  animation: screenIn 0.50s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── REGISTRATION SCREEN ─── */
+#screen-register {
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 24px;
+  overflow: hidden;
+}
+
+#screen-register::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 59px,
+    rgba(42,36,32,0.04) 59px, rgba(42,36,32,0.04) 60px
+  );
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 40%, black 100%);
+  pointer-events: none;
+}
+
+.register-content {
+  position: relative;
+  max-width: 420px;
+  width: 100%;
+}
+
+.register-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--bronze);
+  border-radius: 2px;
+  padding: 5px 14px;
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bronze);
+  margin-bottom: 30px;
+}
+.register-badge::before {
+  content: '';
+  width: 5px; height: 5px;
+  background: var(--bronze);
+  border-radius: 50%;
+  animation: pulse 2.2s ease infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.3; transform: scale(0.5); }
+}
+
+.register-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(28px, 5vw, 42px);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+
+.register-sub {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-bottom: 32px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.form-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--surface);
+  font-family: 'Jost', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--bronze);
+  box-shadow: 0 0 0 3px var(--bronze-dim);
+}
+
+.form-input.error {
+  border-color: #A04530;
+  background: rgba(160,69,48,0.05);
+}
+
+.form-error {
+  font-size: 11px;
+  color: #A04530;
+  margin-top: 3px;
+  display: none;
+}
+
+.form-error.show {
+  display: block;
+}
+
+.register-button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.btn-register {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--ink);
+  color: var(--surface);
+  border: none;
+  padding: 14px 32px;
+  min-height: 44px;
+  width: 100%;
+  font-family: 'Jost', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: var(--shadow-md);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.btn-register:hover:not(:disabled) {
+  background: var(--bronze);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-register:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.register-spinner {
+  display: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.btn-register:disabled .register-spinner {
+  display: block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.register-success {
+  display: none;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 20px;
+  padding: 14px;
+  border-radius: 2px;
+  background: rgba(61,139,96,0.1);
+}
+
+.register-success.show {
+  display: block;
+}
+
+/* ─── INTRO ─── */
+#screen-intro {
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 24px;
+  overflow: hidden;
+}
+
+#screen-intro::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 59px,
+    rgba(42,36,32,0.04) 59px, rgba(42,36,32,0.04) 60px
+  );
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 40%, black 100%);
+  pointer-events: none;
+}
+
+.intro-content { position: relative; max-width: 580px; }
+
+.intro-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--bronze);
+  border-radius: 2px;
+  padding: 5px 14px;
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bronze);
+  margin-bottom: 30px;
+}
+.intro-badge::before {
+  content: '';
+  width: 5px; height: 5px;
+  background: var(--bronze);
+  border-radius: 50%;
+  animation: pulse 2.2s ease infinite;
+}
+
+.intro-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(34px, 5.5vw, 56px);
+  font-weight: 700;
+  line-height: 1.08;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+.intro-title em { font-style: italic; color: var(--bronze); }
+
+.intro-rule {
+  width: 48px; height: 1px;
+  background: var(--bronze);
+  margin: 0 auto 20px;
+  opacity: 0.5;
+}
+
+.intro-sub {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.75;
+  font-weight: 300;
+  margin-bottom: 38px;
+  max-width: 420px;
+  margin-left: auto; margin-right: auto;
+}
+
+.intro-meta {
+  display: flex;
+  justify-content: center;
+  gap: 36px;
+  margin-bottom: 44px;
+  flex-wrap: wrap;
+}
+.intro-meta-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.intro-meta-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px; font-weight: 600;
+  color: var(--bronze);
+}
+.intro-meta-label {
+  font-size: 9.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted);
+}
+.intro-meta-div {
+  width: 1px; height: 36px;
+  background: var(--border);
+  align-self: center;
+}
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--ink);
+  color: var(--surface);
+  border: none;
+  padding: 14px 32px;
+  min-height: 44px;
+  min-width: 44px;
+  font-family: 'Jost', sans-serif;
+  font-size: 12px; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  cursor: pointer; border-radius: 2px;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: var(--shadow-md);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.btn-primary:hover {
+  background: var(--bronze);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ─── ROLE SELECTION ─── */
+#screen-role {
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.role-content {
+  position: relative;
+  max-width: 640px;
+  text-align: center;
+}
+
+.role-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+
+.role-sub {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 44px;
+  line-height: 1.7;
+}
+
+.role-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+@media (max-width: 600px) {
+  .role-grid { grid-template-columns: 1fr; }
+}
+
+.role-card {
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--card);
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.role-card:hover {
+  border-color: var(--bronze);
+  box-shadow: var(--shadow-md);
+}
+
+.role-card.selected {
+  border-color: var(--bronze);
+  background: var(--bronze-dim);
+  box-shadow: var(--shadow-md);
+}
+
+.role-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.role-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.role-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+#role-next {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* ─── QUESTIONS ─── */
+#screen-questions {
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  flex-direction: column;
+}
+
+.questions-container {
+  position: relative;
+  max-width: 640px;
+  width: 100%;
+}
+
+.q-header {
+  margin-bottom: 32px;
+}
+
+.q-num {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.q-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--ink);
+  margin-bottom: 24px;
+}
+
+.q-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.q-progress-bar {
+  flex: 1;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.q-progress-fill {
+  height: 100%;
+  background: var(--bronze);
+  transition: width 0.3s ease;
+}
+
+.q-progress-num {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  min-width: 40px;
+}
+
+#q-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: opacity 0.15s;
+}
+
+.q-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  font-family: 'Jost', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  border: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.q-option:hover {
+  border-color: var(--bronze);
+  box-shadow: var(--shadow-sm);
+}
+
+.q-option-letter {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bronze-dim);
+  color: var(--bronze);
+  border-radius: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.q-option-text {
+  line-height: 1.5;
+  flex: 1;
+}
+
+/* ─── RESULTS ─── */
+#screen-results {
+  min-height: 100vh;
+  padding: 48px 24px;
+  padding-bottom: 80px;
+}
+
+.results-container {
+  max-width: 840px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.results-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.results-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--bronze);
+  border-radius: 2px;
+  padding: 5px 14px;
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bronze);
+  margin-bottom: 20px;
+}
+
+.results-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(36px, 6vw, 56px);
+  font-weight: 700;
+  line-height: 1.08;
+  margin-bottom: 8px;
+}
+
+.results-tagline {
+  font-size: 18px;
+  font-style: italic;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.results-desc {
+  font-size: 14px;
+  color: var(--ink-2);
+  line-height: 1.75;
+  max-width: 520px;
+  margin: 0 auto 40px;
+}
+
+.score-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 40px;
+  margin-bottom: 32px;
+}
+
+.score-section-title {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+#score-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.score-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 60px;
+  gap: 16px;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .score-row { grid-template-columns: auto 1fr 50px; }
+}
+
+.score-type-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  text-align: right;
+}
+
+.score-track {
+  height: 6px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.score-bar {
+  height: 100%;
+  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  border-radius: 2px;
+}
+
+.score-val {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: right;
+}
+
+.tri-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.tri-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tri-card-head {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding-bottom: 10px;
+  border-bottom: 2px solid;
+}
+
+.tri-card-head.green { color: var(--I); border-color: var(--I); }
+.tri-card-head.red { color: var(--C); border-color: var(--C); }
+.tri-card-head.gold { color: var(--P); border-color: var(--P); }
+
+.tri-item {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+.lens-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.lens-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: all 0.3s;
+}
+
+.lens-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.lens-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.lens-title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lens-body {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+.mismatch-box {
+  background: rgba(160,69,48,0.08);
+  border: 1px solid rgba(160,69,48,0.2);
+  border-radius: 2px;
+  padding: 24px;
+  margin-bottom: 32px;
+  display: none;
+}
+
+.mismatch-box.visible {
+  display: block;
+}
+
+.mismatch-label {
+  font-size: 10px;
+  color: #A04530;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+#mismatch-text {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+.action-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 40px;
+  margin-bottom: 32px;
+}
+
+.action-section-title {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+#action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.action-item {
+  display: flex;
+  gap: 16px;
+}
+
+.action-num {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  font-weight: 700;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.action-text {
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--ink-2);
+  padding-top: 2px;
+}
+
+.action-text strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.results-footer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 48px;
+  flex-wrap: wrap;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 28px;
+  min-height: 44px;
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  font-family: 'Jost', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.btn-secondary:hover {
+  border-color: var(--bronze);
+  box-shadow: var(--shadow-sm);
+}
+
+.badge-group {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.badge {
+  background: var(--surface);
+  color: var(--ink-2);
+  padding: 4px 10px;
+  border-radius: 2px;
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- REGISTRATION SCREEN -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div id="screen-register" class="screen active">
+  <div class="register-content">
+    <div class="register-badge">
+      ✓ Get Started
+    </div>
+    
+    <h1 class="register-title">Join the Audit</h1>
+    
+    <p class="register-sub">
+      Quick registration to access your organizational culture diagnostic.
+      Takes less than a minute.
+    </p>
+
+    <form id="register-form" onsubmit="submitRegistration(event)">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" id="reg-name" class="form-input" placeholder="Your full name" required>
+        <span class="form-error" id="error-name">Please enter your name</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" id="reg-email" class="form-input" placeholder="your@email.com" required>
+        <span class="form-error" id="error-email">Please enter a valid email</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Mobile Number</label>
+        <input type="tel" id="reg-mobile" class="form-input" placeholder="+91 98765 43210" required>
+        <span class="form-error" id="error-mobile">Please enter a valid mobile number</span>
+      </div>
+
+      <div class="register-button-group">
+        <button type="submit" class="btn-register" id="submit-btn">
+          <span class="register-spinner"></span>
+          <span>Begin Audit</span>
+        </button>
+      </div>
+
+      <div class="register-success" id="register-success">
+        ✓ Welcome! Redirecting to the audit...
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- INTRO SCREEN -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div id="screen-intro" class="screen">
+  <div class="intro-content">
+    <div class="intro-badge">
+      ◉ Organizational Diagnostic
+    </div>
+    
+    <h1 class="intro-title">What kind of culture are <em>you actually</em> building?</h1>
+    
+    <div class="intro-rule"></div>
+    
+    <p class="intro-sub">
+      8 scenario-based questions. No theory. No jargon.<br>
+      A precise read on your org's operating DNA — and where it's working against you.
+    </p>
+    
+    <div class="intro-meta">
+      <div class="intro-meta-item">
+        <div class="intro-meta-num">5</div>
+        <div class="intro-meta-label">Culture Types</div>
+      </div>
+      <div class="intro-meta-div"></div>
+      <div class="intro-meta-item">
+        <div class="intro-meta-num">8</div>
+        <div class="intro-meta-label">Scenarios</div>
+      </div>
+      <div class="intro-meta-div"></div>
+      <div class="intro-meta-item">
+        <div class="intro-meta-num">&lt;5</div>
+        <div class="intro-meta-label">Minutes</div>
+      </div>
+    </div>
+    
+    <button class="btn-primary" onclick="goTo('screen-role')">BEGIN AUDIT <span>→</span></button>
+    
+    <div class="badge-group">
+      <div class="badge">Performance-Driven</div>
+      <div class="badge">Process-Driven</div>
+      <div class="badge">Innovation-Driven</div>
+      <div class="badge">Control-Driven</div>
+      <div class="badge">People-First</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- ROLE SELECTION SCREEN -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div id="screen-role" class="screen">
+  <div class="role-content">
+    <h2 class="role-title">What's your vantage point?</h2>
+    <p class="role-sub">We'll tailor the feedback to your perspective.</p>
+    
+    <div class="role-grid">
+      <div class="role-card" data-role="founder" onclick="selectRole(this)">
+        <div class="role-icon">👑</div>
+        <div class="role-name">Founder / CEO</div>
+        <div class="role-desc">Leading the organization</div>
+      </div>
+      <div class="role-card" data-role="leader" onclick="selectRole(this)">
+        <div class="role-icon">🎯</div>
+        <div class="role-name">Leader / Manager</div>
+        <div class="role-desc">Managing a team</div>
+      </div>
+      <div class="role-card" data-role="individual" onclick="selectRole(this)">
+        <div class="role-icon">👤</div>
+        <div class="role-name">Individual Contributor</div>
+        <div class="role-desc">Part of the team</div>
+      </div>
+      <div class="role-card" data-role="observer" onclick="selectRole(this)">
+        <div class="role-icon">🔍</div>
+        <div class="role-name">Advisor / Consultant</div>
+        <div class="role-desc">Outside perspective</div>
+      </div>
+    </div>
+    
+    <button class="btn-primary" id="role-next" onclick="startQuestions()">NEXT <span>→</span></button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- QUESTIONS SCREEN -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div id="screen-questions" class="screen">
+  <div class="questions-container">
+    <div class="q-header">
+      <div class="q-num" id="q-num">Question 1</div>
+      <div class="q-text" id="q-text">Question goes here</div>
+    </div>
+    
+    <div class="q-progress">
+      <div class="q-progress-bar">
+        <div class="q-progress-fill" id="q-fill"></div>
+      </div>
+      <div class="q-progress-num"><span id="q-count">1/8</span></div>
+    </div>
+    
+    <div id="q-options"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- RESULTS SCREEN -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div id="screen-results" class="screen">
+  <div class="results-container">
+    <div class="results-header">
+      <div class="results-badge">✓ Your Result</div>
+      <h1 class="results-name" id="res-name">Culture Type</h1>
+      <h2 class="results-tagline" id="res-tagline">Tagline</h2>
+      <p class="results-desc" id="res-desc">Description</p>
+    </div>
+
+    <div class="score-section">
+      <div class="score-section-title">Your Culture Scores</div>
+      <div id="score-bars"></div>
+    </div>
+
+    <div class="tri-grid" id="tri-grid"></div>
+
+    <div class="lens-grid" id="lens-grid"></div>
+
+    <div class="mismatch-box" id="mismatch-box">
+      <div class="mismatch-label">⚠ Tension in the system</div>
+      <div id="mismatch-text"></div>
+    </div>
+
+    <div class="action-section">
+      <div class="action-section-title">Next Steps</div>
+      <div id="action-list"></div>
+    </div>
+
+    <div class="results-footer">
+      <button class="btn-secondary" onclick="restart()">Restart</button>
+      <button class="btn-secondary" onclick="downloadResults()">Download Results</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// REGISTRATION SYSTEM + RESULTS SAVING
+// ═══════════════════════════════════════════════════════════════════════════
+
+// IMPORTANT: Replace this with your Google Apps Script deployment URL
+const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyKWhNOO4NwnWwbpJSuGcOlZb-dCShKZ0RoTNyjHfibJKV-4_acqvF_gzAx_Tkx_0kY/exec";
+
+// Store user registration data globally
+let currentUser = null;
+
+// Check if user is already registered on page load
+window.addEventListener('DOMContentLoaded', () => {
+  const registeredUserData = localStorage.getItem('registeredUser');
+  if (registeredUserData) {
+    // User is already registered, skip to intro
+    currentUser = JSON.parse(registeredUserData);
+    goTo('screen-intro');
+  }
+});
+
+function validateEmail(email) {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
+}
+
+function validateMobile(mobile) {
+  // Accept 10-15 digit phone numbers (allows +, spaces, hyphens)
+  const re = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
+  return re.test(mobile.replace(/\s/g, ''));
+}
+
+function clearErrors() {
+  document.querySelectorAll('.form-error').forEach(el => el.classList.remove('show'));
+  document.querySelectorAll('.form-input').forEach(el => el.classList.remove('error'));
+}
+
+function submitRegistration(e) {
+  e.preventDefault();
+  clearErrors();
+
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const mobile = document.getElementById('reg-mobile').value.trim();
+
+  let hasErrors = false;
+
+  if (!name) {
+    document.getElementById('reg-name').classList.add('error');
+    document.getElementById('error-name').classList.add('show');
+    hasErrors = true;
+  }
+
+  if (!validateEmail(email)) {
+    document.getElementById('reg-email').classList.add('error');
+    document.getElementById('error-email').classList.add('show');
+    hasErrors = true;
+  }
+
+  if (!validateMobile(mobile)) {
+    document.getElementById('reg-mobile').classList.add('error');
+    document.getElementById('error-mobile').classList.add('show');
+    hasErrors = true;
+  }
+
+  if (hasErrors) return;
+
+  // Disable submit button and show spinner
+  const submitBtn = document.getElementById('submit-btn');
+  submitBtn.disabled = true;
+
+  // Send data to Google Apps Script
+  const payload = {
+    name: name,
+    email: email,
+    mobile: mobile
+  };
+
+  payload.type = 'registration'; // Add request type
+
+  fetch(GOOGLE_APPS_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    mode: 'no-cors'
+  })
+  .then(() => {
+    // Store user data globally for later results submission
+    currentUser = {
+      name: name,
+      email: email,
+      registeredAt: new Date().toISOString()
+    };
+
+    // Save registration to localStorage
+    localStorage.setItem('registeredUser', JSON.stringify(currentUser));
+
+    // Show success message
+    document.getElementById('register-success').classList.add('show');
+
+    // Redirect after 1.5 seconds
+    setTimeout(() => {
+      goTo('screen-intro');
+      submitBtn.disabled = false;
+    }, 1500);
+  })
+  .catch(error => {
+    console.error('Registration error:', error);
+    // Still allow access even if sheet update fails
+    currentUser = {
+      name: name,
+      email: email,
+      registeredAt: new Date().toISOString()
+    };
+    localStorage.setItem('registeredUser', JSON.stringify(currentUser));
+    document.getElementById('register-success').classList.add('show');
+    setTimeout(() => {
+      goTo('screen-intro');
+      submitBtn.disabled = false;
+    }, 1500);
+  });
+}
+
+// Function to save assessment results to Google Sheets
+function saveResultsToSheet(cultureType, cultureScores) {
+  if (!currentUser) {
+    console.warn('No registered user - results not saved to sheet');
+    return;
+  }
+
+  const resultsPayload = {
+    type: 'result',
+    name: currentUser.name,
+    email: currentUser.email,
+    role: selectedRole,
+    cultureType: cultureType,
+    scores: cultureScores
+  };
+
+  fetch(GOOGLE_APPS_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(resultsPayload),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    mode: 'no-cors'
+  })
+  .then(() => {
+    console.log('Results saved to Google Sheet');
+  })
+  .catch(error => {
+    console.error('Error saving results:', error);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CULTURE DIAGNOSTIC LOGIC (ORIGINAL CODE)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const LETTERS = ['A', 'B', 'C', 'D', 'E'];
+
+const questions = [
+  {
+    q: "A project is two weeks in. Early signs suggest the approach won't work, but pivoting costs time. What typically happens?",
+    options: [
+      { text: "Leadership makes the call quickly — best decision for the business, even if mid-course correction stings.", type: 'C' },
+      { text: "The team pushes back with data. If they're right, we pivot. If they're wrong, they own the miss — and learn.", type: 'P' },
+      { text: "We follow the process. If changing course breaks the process, we complete this cycle first, then reassess.", type: 'R' },
+      { text: "We run small experiments to test the new direction in parallel — fail fast, learn quickly.", type: 'I' },
+      { text: "We involve the team in the decision. How do people feel about this? Are relationships intact either way?", type: 'H' }
+    ]
+  },
+  {
+    q: "Someone misses a deadline, and it affects others. How does your org typically handle it?",
+    options: [
+      { text: "It's escalated immediately. Accountability is non-negotiable.", type: 'C' },
+      { text: "We analyze what went wrong, remove the obstacle, and expect it won't happen again.", type: 'P' },
+      { text: "We follow the corrective action process outlined in policy.", type: 'R' },
+      { text: "We view it as a learning opportunity and iterate the process to prevent recurrence.", type: 'I' },
+      { text: "We check in with them first. Is everything okay? How can we support them?", type: 'H' }
+    ]
+  },
+  {
+    q: "You're hiring for a critical role. Two candidates are equally skilled. One fits your culture perfectly; the other brings a perspective you don't have. Who gets hired?",
+    options: [
+      { text: "The one who will close deals faster and drive numbers.", type: 'P' },
+      { text: "The one who challenges us. Comfortable teams don't grow.", type: 'I' },
+      { text: "The one who aligns with how we work — it minimizes friction in our process.", type: 'R' },
+      { text: "The one leadership decides is right. Final call comes from the top.", type: 'C' },
+      { text: "The one the team feels good about. Chemistry matters.", type: 'H' }
+    ]
+  },
+  {
+    q: "A well-liked team member is consistently underperforming. What happens?",
+    options: [
+      { text: "Immediate performance improvement plan. Numbers are numbers.", type: 'P' },
+      { text: "Leadership decides. They'll do what's right for the organization.", type: 'C' },
+      { text: "Structured conversation following HR protocol. Document everything.", type: 'R' },
+      { text: "A candid conversation about what they want and whether this role is still the fit. Maybe they move to a different challenge.", type: 'I' },
+      { text: "Long conversation with empathy. What's really going on? How can we help?", type: 'H' }
+    ]
+  },
+  {
+    q: "A process is inefficient. Three options: automate it, hire someone to own it, or redesign how work flows. What's the move?",
+    options: [
+      { text: "Automate it immediately. Free up resources for more valuable work.", type: 'P' },
+      { text: "Redesign the process. Better systems mean better outcomes.", type: 'R' },
+      { text: "Test automation and redesign in parallel. See which creates the bigger breakthrough.", type: 'I' },
+      { text: "Leadership decides based on the budget and timeline.", type: 'C' },
+      { text: "Whatever keeps the team happiest and healthiest long-term.", type: 'H' }
+    ]
+  },
+  {
+    q: "Budget cuts are coming. You have to reduce spend by 20%. How does this get decided?",
+    options: [
+      { text: "Leadership announces the cuts and where they'll fall. Execution is expected.", type: 'C' },
+      { text: "We cut ruthlessly: lowest ROI projects die first. Every dollar must earn its place.", type: 'P' },
+      { text: "We follow the budgeting process. Tier all initiatives and cut from the bottom.", type: 'R' },
+      { text: "We explore the cut as an opportunity: what can we eliminate without losing core capability?", type: 'I' },
+      { text: "We involve the team. We need their ideas and buy-in for this to work.", type: 'H' }
+    ]
+  },
+  {
+    q: "An employee raises a concern in a meeting that challenges a leader's decision. How does the org typically respond?",
+    options: [
+      { text: "Leadership hears it, considers it, and makes the final call. Respectfully, but decisively.", type: 'C' },
+      { text: "We dig into the data. If the concern has merit, we change course.", type: 'P' },
+      { text: "We table it and discuss it via the proper channels later.", type: 'R' },
+      { text: "We welcome the tension. That's how we avoid blindspots and discover better solutions.", type: 'I' },
+      { text: "We make sure they feel heard and safe. Psychological safety is the foundation.", type: 'H' }
+    ]
+  },
+  {
+    q: "Two teams have conflicting priorities. How does your org resolve it?",
+    options: [
+      { text: "The executive sponsor decides. Quick. Clean. Final.", type: 'C' },
+      { text: "We follow the escalation protocol. It's clear who decides and how.", type: 'R' },
+      { text: "Whoever delivers more revenue wins. That's the deciding factor.", type: 'P' },
+      { text: "We facilitate a conversation: What if we did both? What's the 80/20? Can we iterate?", type: 'I' },
+      { text: "We work to understand both teams' needs and find a solution everyone can live with.", type: 'H' }
+    ]
+  }
+];
+
+const cultures = {
+  P: {
+    name: "Performance-Driven",
+    color: "#8A6A38",
+    dimColor: "rgba(138,106,56,0.1)",
+    tagline: "Outcomes are sovereign. Everything else is in service of the mission.",
+    desc: "Performance cultures live by a simple creed: results matter most, and the clarity of a scoreboard is your operating system. Leadership is visible, ambitious, and measured by wins. Compensation is tethered to impact. The bar is high — and so are the rewards for clearing it. There's little room for political complexity; merit and delivery are what move you forward.",
+    bestFor: ["Rapid scaling", "Competitive markets", "Sales-driven businesses", "Mission-critical execution"],
+    riskZone: ["Burnout from unsustainable pace", "People leaving for 'rest'", "Short-term thinking", "Cynicism when incentives misalign"],
+    symptoms: ["Comp is transparent and tied to outcomes","People talk about 'winning' and 'losing' in normal conversation","Underperformers don't stick around long","Career growth is rapid, tenure is shorter"],
+    leaderLens: "Decisive, competitive, and metrics-obsessed. Moves quickly and expects the org to keep pace. Strong on execution and clarity. Can feel relentless and may inadvertently create a culture of fear if not careful.",
+    empLens: "Highly motivated by clarity and opportunity. Money and status matter. Energized by competition. Can feel exhausted and undervalued if personal wellbeing isn't part of the scorecard.",
+    actions: [
+      { t: "Measure what matters", b: "The scoreboard is powerful because it's transparent. If you're optimizing for pure revenue but want retention, you're sending a conflicting signal. Design metrics that reflect what winning actually looks like long-term." },
+      { t: "Build in reflection", b: "High performers get good at running. Build in moments to ask: why are we doing this? It prevents drift and keeps purpose alive when the pace is relentless." },
+      { t: "Separate compensation from meaning", b: "Not everyone is motivated by money alone. Offer paths to impact, autonomy, or mastery alongside comp. The best performers want to know their work mattered, not just that they won." }
+    ]
+  },
+
+  R: {
+    name: "Process-Driven",
+    color: "#2E7B94",
+    dimColor: "rgba(46,123,148,0.1)",
+    tagline: "The process is the promise. Consistency, compliance, and clarity live here.",
+    desc: "Process cultures move carefully. Decisions are made via protocol, not preference. There's a right way to do things — and it's documented. Change happens, but via the change-management process. Risk is managed through process gates. The organization runs like a well-engineered machine, and that consistency is the point.",
+    bestFor: ["Regulated industries", "Large orgs with many stakeholders", "Established businesses", "Risk-sensitive environments"],
+    riskZone: ["Velocity becomes glacial", "People disengage from process theater", "Innovation stalls", "New talent leaves because 'nothing moves'"],
+    symptoms: ["Multiple approvals for any new idea","Documentation is meticulous","'That's not how we do things' is a common phrase","Process improvements follow a formal process"],
+    leaderLens: "Orderly, deliberate, and risk-aware. Comfortable with structure and skeptical of shortcuts. Strong on governance and predictability. Can feel slow and may accidentally stifle good ideas by requiring too many gates.",
+    empLens: "Appreciate clarity and low surprise. Like knowing what's expected. Can feel constrained and bored if there's no room to push boundaries or move fast.",
+    actions: [
+      { t: "Separate process from purpose", b: "Ask: does this process serve our mission, or have we mistaken the process for the mission? Some processes are anchors, not guardrails. Prune ruthlessly." },
+      { t: "Build in fast lanes", b: "Create a parallel path for low-risk experiments. Not every idea needs full governance. Smart organizations have an 'approved fast track' so innovation doesn't feel forbidden." },
+      { t: "Make process visible", b: "The best processes are invisible because everyone knows them. If you're constantly explaining the process, it's too complex. Simplify until people can navigate by instinct." }
+    ]
+  },
+
+  I: {
+    name: "Innovation-Driven",
+    color: "#3D8B60",
+    dimColor: "rgba(61,139,96,0.1)",
+    tagline: "Iteration is the answer. Move fast, learn quickly, and embrace productive failure.",
+    desc: "Innovation cultures are built on the assumption that the best idea will surface through experimentation, not analysis. Failure is rebranded as 'learning.' Hierarchy is flat enough that ideas can emerge from anywhere. Risk is managed by testing, not by policy. The culture rewards bold thinking and punishes inertia.",
+    bestFor: ["Tech startups", "Competitive emergent markets", "Product-driven businesses", "Uncertain environments"],
+    riskZone: ["Decision fatigue from constant change", "Lack of stability alienates some people", "Chaos masquerading as innovation", "Burnout from always being 'on'"],
+    symptoms: ["'Let's test it' is a default response","Failure is discussed openly and without shame","'No, that's not how we did it last quarter' is normal","People get excited talking about experiments"],
+    leaderLens: "Restless, curious, and permissive of productive failure. Energized by possibility. Comfortable with incomplete information. Can feel unfocused and may leave people wanting more structure.",
+    empLens: "Energized by autonomy and possibility. Love the freedom to experiment. Can feel lost without enough guardrails or anxious when outcomes are unclear.",
+    actions: [
+      { t: "Build a decisions framework", b: "Not every decision should be made via experiment. Create clarity: which decisions are made via data, which via intuition, which via gut? People need to know what mode they're in." },
+      { t: "Slow down to learn, not just to iterate", b: "Fast iteration without reflection is just spinning. Build in retrospectives. Ask: what did we learn? How did this change us? It prevents shallow pivots." },
+      { t: "Create a persistence culture too", b: "Some ideas need room to develop beyond a sprint. Innovation doesn't mean constant change. Know when to double down and when to let go." }
+    ]
+  },
+
+  C: {
+    name: "Control-Driven",
+    color: "#A04530",
+    dimColor: "rgba(160,69,48,0.1)",
+    tagline: "Authority is clear. Decisions flow from the top. Execution is expected.",
+    desc: "Control cultures are led. Power and decision-making are centralized at the top. The org structure is clear; hierarchy is explicit. Communication flows from the center outward. There's little ambiguity about who decides what. The trade-off is speed and decisiveness in exchange for autonomy.",
+    bestFor: ["Family businesses", "High-stakes environments", "Crisis mode", "Organizations with a visionary founder"],
+    riskZone: ["Single points of failure", "People underperform when not directly supervised", "Bottleneck at the top", "High-performers leave to find autonomy"],
+    symptoms: ["Very few people can say 'yes'; most can only say 'I'll ask'","Communication often happens one-on-one, not group","Org chart is carefully maintained","Leadership team is clearly separated from the rest"],
+    leaderLens: "Commanding, confident, and comfortable with authority. Moves decisively and values loyalty. Strong on vision and quick decisions. Can feel paternalistic and may overlook good ideas from below.",
+    empLens: "Appreciate clarity and direct feedback. Know where they stand. Can feel disempowered and undervalued if all decisions require permission.",
+    actions: [
+      { t: "Decentralize decision-making by role, not by permission", b: "Create a framework: these decisions belong to product, these to ops, these to leadership. People need true decision rights, not the appearance of them. Delegation is not asking forgiveness later." },
+      { t: "Invest in your bench", b: "Succession risk is your biggest vulnerability. Develop 2-3 people who can make your calls. If the organization can't survive your absence, you haven't built an organization." },
+      { t: "Separate decision-making from relationship-building", b: "People may agree because of loyalty, not conviction. Create space for dissent. The best ideas often come from the person willing to disagree respectfully." }
+    ]
+  },
+
+  H: {
+    name: "People-First",
+    color: "#6B50A2",
+    dimColor: "rgba(107,80,162,0.1)",
+    tagline: "People are the mission. Culture, belonging, and care are how we win.",
+    desc: "People-first cultures are built on genuine care and belonging. Decisions are made with relationship in mind. Mental health and wellbeing are spoken about openly. Performance matters, but how you perform — the way you treat others, your integrity, your presence — matters more. Loyalty runs deep; people stay because they feel seen.",
+    bestFor: ["Mission-driven non-profits", "Therapy and wellness spaces", "Consulting and advisory", "Companies with strong founder values"],
+    riskZone: ["High retention — people stay for the feeling, not just the comp", "Leadership knows team members as full humans", "Mental health and wellbeing are spoken about openly", "Performance reviews exist but rarely result in hard decisions"],
+    symptoms: ["High retention — people stay for the feeling, not just the comp","Leadership knows team members as full humans","Mental health and wellbeing are spoken about openly","Performance reviews exist but rarely result in hard decisions"],
+    leaderLens: "Empathetic, relational, and values-driven. Creates genuine psychological safety. Strong on mission. Can struggle with direct accountability and may delay structural decisions to protect relationships.",
+    empLens: "Highly motivated intrinsically. Loyal and genuinely engaged. Can feel blindsided when hard business decisions arrive — because the warmth created an expectation of permanence. Accountability gaps linger because no one wants to be the one who breaks the culture.",
+    actions: [
+      { t: "Separate care from accountability", b: "Build a practice of 'warm candor': the highest form of respect you can show someone is telling them the truth. Delayed feedback isn't kindness — it's a protection of your own comfort at their expense." },
+      { t: "Introduce a performance floor — with dignity", b: "Define what minimum performance looks like in every role. Not to create fear — but so that when someone isn't meeting it, the conversation is about a clear standard, not a personal judgment." },
+      { t: "Pressure-test your culture-fit criteria", b: "List the last 5 people you didn't hire because of 'culture fit.' Would they have added needed tension, diversity of thought, or challenge? If yes — your culture-fit filter may be a comfort filter in disguise." }
+    ]
+  }
+};
+
+const mismatches = {
+  "PC": "You're measuring outcomes but decision-making is centralized at the top. This creates <strong>accountability without authority</strong> — managers are held responsible for results they can't fully control. High-performers will accept this for a quarter, not a career.",
+  "CP": "You're measuring outcomes but decision-making is centralized at the top. This creates <strong>accountability without authority</strong> — managers are held responsible for results they can't fully control. High-performers will accept this for a quarter, not a career.",
+  "IR": "Your org says it wants innovation but process gates are slowing every experiment. The language is 'move fast' — the reality is <strong>'not yet.'</strong> Innovation cultures with process overlays don't die dramatically; they stall quietly until the best people leave.",
+  "RI": "Your org says it wants innovation but process gates are slowing every experiment. The language is 'move fast' — the reality is <strong>'not yet.'</strong> Innovation cultures with process overlays don't die dramatically; they stall quietly until the best people leave.",
+  "IC": "Leadership wants speed and bold bets — but control is centralized at the top. The bottleneck isn't strategy: <strong>it's the decision layer itself.</strong> In practice, no experiment lands without sign-off, which makes innovation a performance, not a capability.",
+  "CI": "Leadership wants speed and bold bets — but control is centralized at the top. The bottleneck isn't strategy: <strong>it's the decision layer itself.</strong> In practice, no experiment lands without sign-off, which makes innovation a performance, not a capability.",
+  "HP": "You prioritize people, but the scoreboard is ultimately running the culture. Empathy and accountability are in <strong>unresolved tension</strong> — and everyone in the org can feel it, even if no one says it directly in a meeting.",
+  "PH": "You prioritize people, but the scoreboard is ultimately running the culture. Empathy and accountability are in <strong>unresolved tension</strong> — and everyone in the org can feel it, even if no one says it directly in a meeting.",
+  "RH": "Process is the authority, but people need more than procedures to feel belonging. Compliance culture quietly erodes psychological safety — people follow the rules and <strong>stop bringing their full selves</strong> to the work.",
+  "HR": "Process is the authority, but people need more than procedures to feel belonging. Compliance culture quietly erodes psychological safety — people follow the rules and <strong>stop bringing their full selves</strong> to the work."
+};
+
+let scores = { P:0, R:0, I:0, C:0, H:0 };
+let currentQ = 0;
+let selectedRole = null;
+
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    s.style.display = 'none';
+  });
+  const target = document.getElementById(id);
+  target.style.display = 'flex';
+  setTimeout(() => target.classList.add('active'), 10);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function selectRole(el) {
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedRole = el.dataset.role;
+  const btn = document.getElementById('role-next');
+  btn.style.opacity = '1';
+  btn.style.pointerEvents = 'auto';
+}
+
+function startQuestions() {
+  if (!selectedRole) return;
+  scores = { P:0, R:0, I:0, C:0, H:0 };
+  currentQ = 0;
+  goTo('screen-questions');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('q-num').textContent = 'Question ' + (currentQ + 1);
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('q-count').textContent = (currentQ + 1) + ' / ' + questions.length;
+  document.getElementById('q-fill').style.width = (currentQ / questions.length * 100) + '%';
+
+  const opts = document.getElementById('q-options');
+  opts.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'q-option';
+    btn.innerHTML = `
+      <div class="q-option-letter">${LETTERS[i]}</div>
+      <div class="q-option-text">${opt.text}</div>
+    `;
+    btn.onclick = () => answerQuestion(opt.type);
+    opts.appendChild(btn);
+  });
+}
+
+function answerQuestion(type) {
+  scores[type]++;
+  currentQ++;
+  if (currentQ >= questions.length) {
+    showResults();
+  } else {
+    const wrap = document.getElementById('q-options');
+    wrap.style.opacity = '0';
+    wrap.style.transition = 'opacity 0.15s';
+    setTimeout(() => {
+      renderQuestion();
+      wrap.style.opacity = '1';
+    }, 180);
+  }
+}
+
+function showResults() {
+  const sorted = Object.entries(scores).sort((a,b) => b[1] - a[1]);
+  const [topType, topScore] = sorted[0];
+  const [secondType] = sorted[1];
+  const culture = cultures[topType];
+  const maxScore = questions.length;
+
+  // *** SAVE RESULTS TO GOOGLE SHEET ***
+  saveResultsToSheet(culture.name, scores);
+
+  document.getElementById('res-name').textContent = culture.name;
+  document.getElementById('res-name').style.color = culture.color;
+  document.getElementById('res-tagline').textContent = culture.tagline;
+  document.getElementById('res-tagline').style.color = culture.color;
+  document.getElementById('res-desc').textContent = culture.desc;
+
+  const barsEl = document.getElementById('score-bars');
+  barsEl.innerHTML = '';
+  const typeNames = { P:'Performance-Driven', R:'Process-Driven', I:'Innovation-Driven', C:'Control-Driven', H:'People-First' };
+  sorted.forEach(([t, s]) => {
+    const c = cultures[t];
+    const pct = Math.round(s / maxScore * 100);
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    row.innerHTML = `
+      <div class="score-type-label">${typeNames[t]}</div>
+      <div class="score-track"><div class="score-bar" id="bar-${t}" style="background:${c.color};width:0%"></div></div>
+      <div class="score-val">${s}/${maxScore}</div>
+    `;
+    barsEl.appendChild(row);
+    setTimeout(() => {
+      document.getElementById('bar-'+t).style.width = Math.max(pct, s>0?8:0) + '%';
+    }, 300);
+  });
+
+  const triEl = document.getElementById('tri-grid');
+  triEl.innerHTML = `
+    <div class="tri-card">
+      <div class="tri-card-head green">✓ Best Fit For</div>
+      ${culture.bestFor.map(x => `<div class="tri-item">${x}</div>`).join('')}
+    </div>
+    <div class="tri-card">
+      <div class="tri-card-head red">⚡ Risk Zone</div>
+      ${culture.riskZone.map(x => `<div class="tri-item">${x}</div>`).join('')}
+    </div>
+    <div class="tri-card">
+      <div class="tri-card-head gold">◉ Daily Signals</div>
+      ${culture.symptoms.map(x => `<div class="tri-item">${x}</div>`).join('')}
+    </div>
+  `;
+
+  const isLeadership = selectedRole === 'founder' || selectedRole === 'leader';
+  const lensEl = document.getElementById('lens-grid');
+  lensEl.innerHTML = `
+    <div class="lens-card" style="border-color:${isLeadership ? culture.color : 'var(--border)'}; ${isLeadership ? 'background:'+culture.dimColor : ''}">
+      <div class="lens-head">
+        <div class="lens-dot" style="background:${culture.color}"></div>
+        <div class="lens-title" style="color:${culture.color}">Leadership Pattern</div>
+        ${isLeadership ? '<div style="font-size:9.5px;color:var(--muted);margin-left:auto;letter-spacing:0.08em">← Your Lens</div>' : ''}
+      </div>
+      <div class="lens-body">${culture.leaderLens}</div>
+    </div>
+    <div class="lens-card" style="border-color:${!isLeadership ? culture.color : 'var(--border)'}; ${!isLeadership ? 'background:'+culture.dimColor : ''}">
+      <div class="lens-head">
+        <div class="lens-dot" style="background:var(--muted)"></div>
+        <div class="lens-title" style="color:var(--muted)">Employee Experience</div>
+        ${!isLeadership ? '<div style="font-size:9.5px;color:var(--muted);margin-left:auto;letter-spacing:0.08em">← Your Lens</div>' : ''}
+      </div>
+      <div class="lens-body">${culture.empLens}</div>
+    </div>
+  `;
+
+  const mismatchKey = topType + secondType;
+  const mismatchBox = document.getElementById('mismatch-box');
+  if (mismatches[mismatchKey] && topScore >= 2 && sorted[1][1] >= 2) {
+    document.getElementById('mismatch-text').innerHTML = mismatches[mismatchKey];
+    mismatchBox.classList.add('visible');
+  } else {
+    mismatchBox.classList.remove('visible');
+  }
+
+  const actionEl = document.getElementById('action-list');
+  actionEl.innerHTML = '';
+  culture.actions.forEach((a, i) => {
+    const item = document.createElement('div');
+    item.className = 'action-item';
+    item.innerHTML = `
+      <div class="action-num" style="background:${culture.dimColor};color:${culture.color}">${i+1}</div>
+      <div class="action-text"><strong>${a.t}.</strong> ${a.b}</div>
+    `;
+    actionEl.appendChild(item);
+  });
+
+  goTo('screen-results');
+}
+
+function restart() {
+  scores = { P:0, R:0, I:0, C:0, H:0 };
+  currentQ = 0;
+  selectedRole = null;
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  const btn = document.getElementById('role-next');
+  btn.style.opacity = '0.35';
+  btn.style.pointerEvents = 'none';
+  goTo('screen-intro');
+}
+
+function downloadResults() {
+  const sorted = Object.entries(scores).sort((a,b) => b[1] - a[1]);
+  const [topType] = sorted[0];
+  const culture = cultures[topType];
+  
+  const text = `
+ORGANIZATIONAL CULTURE DIAGNOSTIC — RESULTS
+═══════════════════════════════════════════════════════════
+
+Your Culture Type: ${culture.name}
+${culture.tagline}
+
+${culture.desc}
+
+───────────────────────────────────────────────────────────
+
+CULTURE SCORES:
+${Object.entries(scores).sort((a,b) => b[1] - a[1]).map(([t, s]) => {
+  const typeNames = { P:'Performance-Driven', R:'Process-Driven', I:'Innovation-Driven', C:'Control-Driven', H:'People-First' };
+  return `${typeNames[t]}: ${s}/${questions.length}`;
+}).join('\n')}
+
+Generated: ${new Date().toLocaleDateString()}
+`;
+
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `culture-diagnostic-results.txt`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
